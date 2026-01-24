@@ -4,6 +4,14 @@ This is an implementation of [file-manager-interface](https://www.freedesktop.or
 
 It could be an alternative to [boydaihungst's implementation](https://github.com/boydaihungst/org.freedesktop.FileManager1.common).
 
+## Installation
+
+```bash
+git clone "https://github.com/levinion/filemanager1"
+cd filemanager1
+make
+```
+
 ## Configuration
 
 The application searches for the configuration file in the following order:
@@ -22,7 +30,7 @@ For example:
 
 As the service receives a call like:
 
-```shell
+```bash
 gdbus call --session \
   --dest org.freedesktop.FileManager1 \
   --object-path /org/freedesktop/FileManager1 \
