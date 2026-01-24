@@ -1,0 +1,12 @@
+[Unit]
+Description=FileManager1 D-Bus Service
+After=dbus.socket
+
+[Service]
+ExecStart=/usr/bin/filemanager1
+Restart=on-failure
+Type=dbus
+BusName=org.freedesktop.FileManager1
+
+[Install]
+WantedBy=default.target
