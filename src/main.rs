@@ -27,11 +27,8 @@ impl Configuration for Config {
         Vipera::new()
             .set_config_name("config.toml")
             .add_config_path("$XDG_CONFIG_HOME/filemanager1")
-            .unwrap()
             .add_config_path("~/.config/filemanager1")
-            .unwrap()
             .add_config_path("/usr/share/filemanager1")
-            .unwrap()
     }
 }
 
