@@ -1,7 +1,6 @@
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::{
-    error::Error, future::pending, os::unix::process::CommandExt, path::PathBuf, process::Command,
-};
+use std::{future::pending, os::unix::process::CommandExt, path::PathBuf, process::Command};
 use vipera::{Configuration, Vipera};
 use zbus::{connection, interface};
 
@@ -23,12 +22,13 @@ impl Default for Config {
 }
 
 impl Configuration for Config {
-    fn vipera() -> vipera::Vipera {
-        Vipera::new()
-            .set_config_name("config.toml")
-            .add_config_path("$XDG_CONFIG_HOME/filemanager1")
-            .add_config_path("~/.config/filemanager1")
-            .add_config_path("/usr/share/filemanager1")
+    fn vipera() -> Result<vipera::Vipera> {
+        let vipera = Vipera::new()
+            .set_config_name("config.toml")?
+            .add_config_path("$XDG_CONFIG_HOME/filemanager1")?
+            .add_config_path("~/.config/filemanager1")?
+            .add_config_path("/usr/share/filemanager1")?;
+        Ok(vipera)
     }
 }
 
@@ -71,7 +71,7 @@ impl FileManager1 {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<()> {
     let config = Config::read_in_config().unwrap_or_default();
     let filemanager1 = FileManager1 { config };
     let _conn = connection::Builder::session()?
