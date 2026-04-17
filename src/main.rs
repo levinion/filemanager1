@@ -16,7 +16,7 @@ struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            cmd: "foot -e yazi {}".to_owned(),
+            cmd: "foot -a yazi -e yazi {}".to_owned(),
         }
     }
 }

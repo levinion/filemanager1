@@ -23,7 +23,7 @@ The application searches for the configuration file in the following order:
 If no config file is found, the following default is used:
 
 ```toml
-cmd = "foot -e yazi {}"
+cmd = "foot -a yazi -e yazi {}"
 ```
 
 For example:
@@ -35,13 +35,13 @@ gdbus call --session \
   --dest org.freedesktop.FileManager1 \
   --object-path /org/freedesktop/FileManager1 \
   --method org.freedesktop.FileManager1.ShowFolders \
-  "['file://~/Documents', 'file://~/Downloads']" ""
+  "['file://$HOME/Documents', 'file://$HOME/Downloads']" ""
 ```
 
 The cmd will be transformed into:
 
 ```bash
-foot -e yazi ~/Documents ~/Downloads
+foot -e yazi $HOME/Documents $HOME/Downloads
 ```
 
 If there's more customized needs, try wrapping the command with a script instead.
