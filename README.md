@@ -18,7 +18,7 @@ The application searches for the configuration file in the following order:
 
 1. `$XDG_CONFIG_HOME/filemanager1/config.toml`
 2. `~/.config/filemanager1/config.toml` 
-3. `/usr/share/filemanager1/config.toml`
+3. `/etc/filemanager1/config.toml`
 
 If no config file is found, the following default is used:
 

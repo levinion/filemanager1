@@ -27,7 +27,7 @@ impl Configuration for Config {
             .set_config_name("config.toml")?
             .add_config_path("$XDG_CONFIG_HOME/filemanager1")?
             .add_config_path("~/.config/filemanager1")?
-            .add_config_path("/usr/share/filemanager1")?;
+            .add_config_path("/etc/filemanager1")?;
         Ok(vipera)
     }
 }
@@ -42,6 +42,7 @@ impl FileManager1 {
             .collect::<Vec<_>>()
             .join(" ");
         let items = self.config.cmd.replace("{}", &items);
+        eprintln!("show_folders: {}", &items);
         let args = vec!["-c", &items];
         let _ = Command::new("sh").args(args).process_group(0).spawn();
     }
@@ -54,6 +55,7 @@ impl FileManager1 {
             .collect::<Vec<_>>()
             .join(" ");
         let items = self.config.cmd.replace("{}", &items);
+        eprintln!("show_items: {}", &items);
         let args = vec!["-c", &items];
         let _ = Command::new("sh").args(args).process_group(0).spawn();
     }
@@ -65,6 +67,7 @@ impl FileManager1 {
             .collect::<Vec<_>>()
             .join(" ");
         let items = self.config.cmd.replace("{}", &items);
+        eprintln!("show_item_properties: {}", &items);
         let args = vec!["-c", &items];
         let _ = Command::new("sh").args(args).process_group(0).spawn();
     }
