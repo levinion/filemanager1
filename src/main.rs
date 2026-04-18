@@ -1,6 +1,13 @@
 use anyhow::Result;
+use itertools::Itertools;
+use notify_rust::Notification;
 use serde::{Deserialize, Serialize};
-use std::{future::pending, os::unix::process::CommandExt, path::PathBuf, process::Command};
+use std::{
+    future::pending,
+    os::unix::process::CommandExt,
+    path::{Path, PathBuf},
+    process::Command,
+};
 use vipera::{Configuration, Vipera};
 use zbus::{connection, interface};
 
@@ -34,42 +41,99 @@ impl Configuration for Config {
 
 #[interface(name = "org.freedesktop.FileManager1")]
 impl FileManager1 {
-    fn show_folders(&mut self, uris: Vec<String>, _startup_id: String) {
-        let items = uris
+    fn show_folders(&mut self, uris: Vec<String>, _startup_id: String) -> zbus::fdo::Result<()> {
+        let raw_items = uris
             .iter()
+            .unique()
             .filter_map(|uri| uri.strip_prefix("file://"))
-            .filter(|path| PathBuf::from(path).is_dir())
-            .collect::<Vec<_>>()
-            .join(" ");
-        let items = self.config.cmd.replace("{}", &items);
+            .filter_map(|path| urlencoding::decode(path).ok())
+            .map(|path| path.to_string())
+            .collect::<Vec<_>>();
+        let items = raw_items
+            .iter()
+            .filter_map(|path| {
+                let path = Path::new(path);
+                if path.is_dir() {
+                    Some(path.to_path_buf())
+                } else {
+                    path.parent().map(|parent| parent.to_path_buf())
+                }
+            })
+            .map(|path| path.to_string_lossy().to_string())
+            .collect::<Vec<_>>();
+        if items.is_empty() {
+            let err = zbus::fdo::Error::FileNotFound(raw_items.join(" "));
+            let _ = Notification::new()
+                .summary("FileManager1")
+                .body(&err.to_string())
+                .show();
+            return Err(err);
+        }
+        let items = self.config.cmd.replace("{}", &items.join(" "));
         eprintln!("show_folders: {}", &items);
         let args = vec!["-c", &items];
         let _ = Command::new("sh").args(args).process_group(0).spawn();
+        Ok(())
     }
 
-    fn show_items(&mut self, uris: Vec<String>, _startup_id: String) {
-        let items = uris
+    fn show_items(&mut self, uris: Vec<String>, _startup_id: String) -> zbus::fdo::Result<()> {
+        let raw_items = uris
             .iter()
+            .unique()
             .filter_map(|uri| uri.strip_prefix("file://"))
-            .filter(|path| PathBuf::from(path).is_file())
-            .collect::<Vec<_>>()
-            .join(" ");
-        let items = self.config.cmd.replace("{}", &items);
+            .filter_map(|path| urlencoding::decode(path).ok())
+            .map(|path| path.to_string())
+            .collect::<Vec<_>>();
+        let items = raw_items
+            .iter()
+            .filter(|path| PathBuf::from(path).exists())
+            .cloned()
+            .collect::<Vec<_>>();
+        if items.is_empty() {
+            let err = zbus::fdo::Error::FileNotFound(raw_items.join(" "));
+            let _ = Notification::new()
+                .summary("FileManager1")
+                .body(&err.to_string())
+                .show();
+            return Err(err);
+        }
+        let items = self.config.cmd.replace("{}", &items.join(" "));
         eprintln!("show_items: {}", &items);
         let args = vec!["-c", &items];
         let _ = Command::new("sh").args(args).process_group(0).spawn();
+        Ok(())
     }
 
-    fn show_item_properties(&mut self, uris: Vec<String>, _startup_id: String) {
-        let items = uris
+    fn show_item_properties(
+        &mut self,
+        uris: Vec<String>,
+        _startup_id: String,
+    ) -> zbus::fdo::Result<()> {
+        let raw_items = uris
             .iter()
+            .unique()
             .filter_map(|uri| uri.strip_prefix("file://"))
-            .collect::<Vec<_>>()
-            .join(" ");
-        let items = self.config.cmd.replace("{}", &items);
+            .filter_map(|path| urlencoding::decode(path).ok())
+            .map(|path| path.to_string())
+            .collect::<Vec<_>>();
+        let items = raw_items
+            .iter()
+            .filter(|path| PathBuf::from(path).exists())
+            .cloned()
+            .collect::<Vec<_>>();
+        if items.is_empty() {
+            let err = zbus::fdo::Error::FileNotFound(raw_items.join(" "));
+            let _ = Notification::new()
+                .summary("FileManager1")
+                .body(&err.to_string())
+                .show();
+            return Err(err);
+        }
+        let items = self.config.cmd.replace("{}", &items.join(" "));
         eprintln!("show_item_properties: {}", &items);
         let args = vec!["-c", &items];
         let _ = Command::new("sh").args(args).process_group(0).spawn();
+        Ok(())
     }
 }
 

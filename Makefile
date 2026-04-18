@@ -15,4 +15,8 @@ clean:
 	rm $(DESTDIR)/usr/share/dbus-1/services/org.freedesktop.FileManager1.service
 	rm ${DESTDIR}/usr/lib/systemd/user/filemanager1.service
 
-.PHONY: build install clean default
+reload:
+	systemctl --user daemon-reload
+	systemctl --user restart filemanager1.service 
+
+.PHONY: build install clean default reload

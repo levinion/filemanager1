@@ -41,7 +41,7 @@ gdbus call --session \
 The cmd will be transformed into:
 
 ```bash
-foot -e yazi $HOME/Documents $HOME/Downloads
+foot -a yazi -e yazi $HOME/Documents $HOME/Downloads
 ```
 
 If there's more customized needs, try wrapping the command with a script instead.
